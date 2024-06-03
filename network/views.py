@@ -15,7 +15,7 @@ def index(request):
         new_post.save()
         return HttpResponseRedirect(reverse("network:index"))  # Usa el namespace correcto
     else:
-        posts = Post.objects.all()
+        posts = Post.objects.all().order_by('-timestamp')  # Ordenar por timestamp en orden descendente
         return render(request, "network/index.html", {"posts": posts})
     
 
