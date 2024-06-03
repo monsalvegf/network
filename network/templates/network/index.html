@@ -1,14 +1,15 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <h2>New post</h2>
-    <form action="{% url 'network:index' %}" method="post">
-        {% csrf_token %}
-        <textarea name="content" rows="5" cols="50"></textarea>
-        <br>
-        <input type="submit" value="Post">
-    </form>
-    
+    {% if user.is_authenticated %}
+        <h2>New post</h2>
+        <form action="{% url 'network:index' %}" method="post">
+            {% csrf_token %}
+            <textarea name="content" rows="5" cols="50"></textarea>
+            <br>
+            <input type="submit" value="Post">
+        </form>
+    {% endif %}
     <h2>Posts</h2>
     <ul>
         {% for post in posts %}
