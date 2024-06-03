@@ -1,5 +1,25 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    TODO
+    <h2>New post</h2>
+    <form action="{% url 'network:index' %}" method="post">
+        {% csrf_token %}
+        <textarea name="content" rows="5" cols="50"></textarea>
+        <br>
+        <input type="submit" value="Post">
+    </form>
+    
+    <h2>Posts</h2>
+    <ul>
+        {% for post in posts %}
+            <li>
+                <a href="{% url 'network:profile' post.user.username %}">{{ post.user.username }}</a>
+                <span>{{ post.content }}</span>
+                <span>{{ post.timestamp }}</span>
+                <span>{{ post.likes }} likes</span>
+
+            </li>
+        {% endfor %}
+    </ul>
+
 {% endblock %}

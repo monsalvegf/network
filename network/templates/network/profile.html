@@ -1,0 +1,15 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h2>{{ user.username }}</h2>
+    <ul>
+        {% for post in posts %}
+            <li>
+                <span>{{ post.content }}</span>
+                <span>{{ post.timestamp }}</span>
+                <span>{{ post.likes }} likes</span>
+
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -4,12 +4,20 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Post
 
 
 def index(request):
-    return render(request, "network/index.html")
-
+    if request.method == "POST":
+        content = request.POST["content"]  # Asegúrate de que el nombre del campo coincide
+        user = request.user
+        new_post = Post(user=user, content=content)
+        new_post.save()
+        return HttpResponseRedirect(reverse("network:index"))  # Usa el namespace correcto
+    else:
+        posts = Post.objects.all()
+        return render(request, "network/index.html", {"posts": posts})
+    
 
 def login_view(request):
     if request.method == "POST":
@@ -61,3 +69,12 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")
+
+
+def profile(request, username):
+    user = User.objects.get(username=username)
+    posts = Post.objects.filter(user=user)
+    return render(request, "network/profile.html", {"posts": posts, "user": user})
+
+
+
