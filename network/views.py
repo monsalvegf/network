@@ -3,6 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.db.models import Count
+
 
 from .models import User, Post, Follow, Like
 
@@ -73,17 +75,12 @@ def register(request):
 
 def profile(request, username):
     user = User.objects.get(username=username)
-    posts = Post.objects.filter(user=user)
-
-    # Cuenta los likes recibidos por cada post del usuario
-    likes_count = {post.id: post.liked.count() for post in posts}
+    posts = Post.objects.filter(user=user).annotate(likes_count=Count('liked'))
 
     return render(request, "network/profile.html", {
         "posts": posts,
-        "user": user,
-        "likes_count": likes_count
+        "user": user
     })
-
 
 
 
