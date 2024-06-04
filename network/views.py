@@ -75,12 +75,36 @@ def register(request):
 
 def profile(request, username):
     user = User.objects.get(username=username)
+    
+    # Obtener los conteos de seguidores y seguidos utilizando los nombres correctos de los campos relacionados
+    user_with_counts = User.objects.filter(username=username).annotate(
+        followers_count=Count('followed'),  # followed es el related_name para los seguidores
+        following_count=Count('follower')   # follower es el related_name para los seguidos
+    ).get()
+    
     posts = Post.objects.filter(user=user).annotate(likes_count=Count('liked')).order_by('-timestamp')
 
     return render(request, "network/profile.html", {
         "posts": posts,
-        "user": user
+        "user": user,
+        "followers_count": user_with_counts.followers_count,
+        "following_count": user_with_counts.following_count
     })
+
+
+def follow(request, username):
+    user = request.user
+    following = User.objects.get(username=username)
+    new_follow = Follow(user=user, following=following)
+    new_follow.save()
+    return HttpResponseRedirect(reverse("network:profile", args=(username,)))
+
+
+def unfollow(request, username):
+    user = request.user
+    following = User.objects.get(username=username)
+    Follow.objects.filter(user=user, following=following).delete()
+    return HttpResponseRedirect(reverse("network:profile", args=(username,)))
 
 
 
