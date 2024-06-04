@@ -2,9 +2,25 @@
 
 {% block body %}
 <div class="container">
-    <h2>{{ user.username }}</h2>
+    <h2>{{ user_profile.username }}</h2>
     <p>Followers: {{ followers_count }}</p>
     <p>Following: {{ following_count }}</p>
+    {% if user.is_authenticated %}
+        {% if user != user_profile %}
+            {% if not following %}
+                <form action="{% url 'network:follow' user_profile.username %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Follow</button>
+                </form>
+            {% else %}
+                <form action="{% url 'network:unfollow' user_profile.username %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">Unfollow</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    <h4>Posts:</h4>
     <ul class="list-group">
         {% for post in posts %}
             <li class="list-group-item">

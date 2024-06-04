@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.db.models import Count
+from django.contrib.auth.decorators import login_required
 
 
 from .models import User, Post, Follow, Like
@@ -74,37 +75,38 @@ def register(request):
 
 
 def profile(request, username):
-    user = User.objects.get(username=username)
+    user_profile = get_object_or_404(User, username=username)
     
-    # Obtener los conteos de seguidores y seguidos utilizando los nombres correctos de los campos relacionados
+    # Obtener los conteos de seguidores y seguidos
     user_with_counts = User.objects.filter(username=username).annotate(
         followers_count=Count('followed'),  # followed es el related_name para los seguidores
         following_count=Count('follower')   # follower es el related_name para los seguidos
     ).get()
     
-    posts = Post.objects.filter(user=user).annotate(likes_count=Count('liked')).order_by('-timestamp')
+    posts = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+
+    following = False
+    if request.user.is_authenticated:
+        following = Follow.objects.filter(user=request.user, following=user_profile).exists()
 
     return render(request, "network/profile.html", {
         "posts": posts,
-        "user": user,
+        "user_profile": user_profile,
         "followers_count": user_with_counts.followers_count,
-        "following_count": user_with_counts.following_count
+        "following_count": user_with_counts.following_count,
+        "following": following
     })
 
-
+@login_required
 def follow(request, username):
-    user = request.user
-    following = User.objects.get(username=username)
-    new_follow = Follow(user=user, following=following)
-    new_follow.save()
-    return HttpResponseRedirect(reverse("network:profile", args=(username,)))
+    profile_user = get_object_or_404(User, username=username)
+    if request.user != profile_user:
+        Follow.objects.get_or_create(user=request.user, following=profile_user)
+    return redirect('network:profile', username=username)
 
-
+@login_required
 def unfollow(request, username):
-    user = request.user
-    following = User.objects.get(username=username)
-    Follow.objects.filter(user=user, following=following).delete()
-    return HttpResponseRedirect(reverse("network:profile", args=(username,)))
-
-
-
+    profile_user = get_object_or_404(User, username=username)
+    if request.user != profile_user:
+        Follow.objects.filter(user=request.user, following=profile_user).delete()
+    return redirect('network:profile', username=username)
