@@ -42,8 +42,8 @@ class Follow(models.Model):
         }
 
 class Like(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="liker")
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="liked")
 
     class Meta:
         constraints = [

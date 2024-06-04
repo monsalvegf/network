@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Post
+from .models import User, Post, Follow, Like
 
 
 def index(request):
@@ -74,7 +74,16 @@ def register(request):
 def profile(request, username):
     user = User.objects.get(username=username)
     posts = Post.objects.filter(user=user)
-    return render(request, "network/profile.html", {"posts": posts, "user": user})
+
+    # Cuenta los likes recibidos por cada post del usuario
+    likes_count = {post.id: post.liked.count() for post in posts}
+
+    return render(request, "network/profile.html", {
+        "posts": posts,
+        "user": user,
+        "likes_count": likes_count
+    })
+
 
 
 
