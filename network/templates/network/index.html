@@ -17,9 +17,10 @@
                 <a href="{% url 'network:profile' post.user.username %}">{{ post.user.username }}</a>
                 <span>{{ post.content }}</span>
                 <span>{{ post.timestamp }}</span>
-                <span>{{ post.likes }} likes</span>
+                <span>{{ post.likes_count }} likes</span>
 
             </li>
+            
         {% endfor %}
     </ul>
 
