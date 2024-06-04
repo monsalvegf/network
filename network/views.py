@@ -75,7 +75,7 @@ def register(request):
 
 def profile(request, username):
     user = User.objects.get(username=username)
-    posts = Post.objects.filter(user=user).annotate(likes_count=Count('liked'))
+    posts = Post.objects.filter(user=user).annotate(likes_count=Count('liked')).order_by('-timestamp')
 
     return render(request, "network/profile.html", {
         "posts": posts,

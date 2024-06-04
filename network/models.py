@@ -24,8 +24,8 @@ class Post(models.Model):
     
 
 class Follow(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followers")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="follower")
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name="followed")
 
     class Meta:
         constraints = [
