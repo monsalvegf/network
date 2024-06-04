@@ -1,16 +1,18 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+<div class="container">
     <h2>{{ user.username }}</h2>
     <p>Followers: {{ followers_count }}</p>
     <p>Following: {{ following_count }}</p>
-    <ul>
+    <ul class="list-group">
         {% for post in posts %}
-            <li>
-                <span>{{ post.content }}</span>
-                <span>{{ post.timestamp }}</span>
-                <span>{{ post.likes_count }} likes</span>
+            <li class="list-group-item">
+                <p>{{ post.content }}</p>
+                <small class="text-muted">{{ post.timestamp }}</small>
+                <p><strong>{{ post.likes_count }} likes</strong></p>
             </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}
