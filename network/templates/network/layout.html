@@ -24,7 +24,9 @@
                 </li>
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Following</a>
+                        {% with username=request.user.username|default:"default_username" %}
+                            <a class="nav-link" href="{% url 'network:following' username %}">Following</a>
+                        {% endwith %}
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'network:logout' %}">Log Out</a>

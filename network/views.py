@@ -110,3 +110,15 @@ def unfollow(request, username):
     if request.user != profile_user:
         Follow.objects.filter(user=request.user, following=profile_user).delete()
     return redirect('network:profile', username=username)
+
+@login_required
+def following(request, username):
+    # Obtener el perfil de usuario; asegurándose de que existe.
+    user_profile = get_object_or_404(User, username=username)
+    
+    # Obtener posts asociados al usuario, ordenados por fecha de creación en orden descendente.
+    posts = Post.objects.filter(user=user_profile).order_by('-timestamp')
+    
+    # Renderizar la vista con los posts obtenidos.
+    return render(request, "network/following.html", {"posts": posts})
+
