@@ -134,10 +134,15 @@ def following(request):
     # Obtener los usuarios que el usuario actual sigue.
     following_users = User.objects.filter(followed__user=user)
     
-    # Obtener posts de los usuarios seguidos, ordenados por fecha de creación en orden descendente.
-    posts = Post.objects.filter(user__in=following_users).order_by('-timestamp')
+    # Obtener posts de los usuarios seguidos, ordenados por fecha de creación en orden descendente, en grupos de 10 por página.
+    posts_list = Post.objects.filter(user__in=following_users).order_by('-timestamp')
+    paginator = Paginator(posts_list, 10)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
     
     # Renderizar la vista con los posts obtenidos.
     return render(request, "network/following.html", {"posts": posts})
+
+
 
 
