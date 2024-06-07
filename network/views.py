@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.db.models import Count
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 
 from .models import User, Post, Follow, Like
@@ -12,15 +13,18 @@ from .models import User, Post, Follow, Like
 
 def index(request):
     if request.method == "POST":
-        content = request.POST["content"]  # Asegúrate de que el nombre del campo coincide
+        content = request.POST["content"]
         user = request.user
         new_post = Post(user=user, content=content)
         new_post.save()
-        return HttpResponseRedirect(reverse("network:index"))  # Usa el namespace correcto
+        return HttpResponseRedirect(reverse("network:index"))
     else:
-        posts = Post.objects.all().annotate(likes_count=Count('liked')).order_by('-timestamp')  # Ordenar por timestamp en orden descendente
+        posts_list = Post.objects.all().annotate(likes_count=Count('liked')).order_by('-timestamp')
+        paginator = Paginator(posts_list, 10)  # Mostrar 10 posts por página
+        page_number = request.GET.get('page')  # Obtener el número de página desde el URL
+        posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
         return render(request, "network/index.html", {"posts": posts})
-    
+
 
 def login_view(request):
     if request.method == "POST":
