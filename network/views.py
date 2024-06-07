@@ -122,3 +122,18 @@ def following(request, username):
     # Renderizar la vista con los posts obtenidos.
     return render(request, "network/following.html", {"posts": posts})
 
+@login_required
+def following(request):
+    # Obtener el usuario actual.
+    user = request.user
+    
+    # Obtener los usuarios que el usuario actual sigue.
+    following_users = User.objects.filter(followed__user=user)
+    
+    # Obtener posts de los usuarios seguidos, ordenados por fecha de creación en orden descendente.
+    posts = Post.objects.filter(user__in=following_users).order_by('-timestamp')
+    
+    # Renderizar la vista con los posts obtenidos.
+    return render(request, "network/following.html", {"posts": posts})
+
+

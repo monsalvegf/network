@@ -25,7 +25,7 @@
                 {% if user.is_authenticated %}
                     <li class="nav-item">
                         {% with username=request.user.username|default:"default_username" %}
-                            <a class="nav-link" href="{% url 'network:following' username %}">Following</a>
+                            <a class="nav-link" href="{% url 'network:following' %}">Following</a>
                         {% endwith %}
                     </li>
                     <li class="nav-item">
