@@ -6,7 +6,10 @@ from django.urls import reverse
 from django.db.models import Count
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
 
 from .models import User, Post, Follow, Like
 
@@ -143,6 +146,17 @@ def following(request):
     # Renderizar la vista con los posts obtenidos.
     return render(request, "network/following.html", {"posts": posts})
 
+@require_POST
+@csrf_exempt
+def save_post(request, post_id):
+    try:
+        content = json.loads(request.body).get('content')
+        post = Post.objects.get(id=post_id, user=request.user)  # Ensures only the owner can edit
+        post.content = content
+        post.save()
+        return JsonResponse({"message": "Post updated successfully."}, status=200)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found or permission denied."}, status=404)
 
 
 

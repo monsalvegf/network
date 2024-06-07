@@ -15,11 +15,20 @@
     <h2>Posts</h2>
     <ul class="list-group">
         {% for post in posts %}
-            <li class="list-group-item">
+            <li class="list-group-item" id="post-{{ post.id }}">
                 <a href="{% url 'network:profile' post.user.username %}"><strong>{{ post.user.username }}</strong></a>
-                <p>{{ post.content }}</p>
-                <small class="text-muted">{{ post.timestamp }}</small>
-                <p><strong>{{ post.likes_count }} likes</strong></p>
+                <div id="post-content-{{ post.id }}">
+                    <p>{{ post.content }}</p>
+                    <small class="text-muted">{{ post.timestamp }}</small>
+                    <p><strong>{{ post.likes_count }} likes</strong></p>
+                </div>
+                {% if user == post.user %}
+                    <button id="edit-button-{{ post.id }}" onclick="editPost({{ post.id }})" class="btn btn-secondary">Edit</button>
+                    <div id="edit-form-{{ post.id }}" style="display:none;">
+                        <textarea class="form-control" id="edit-content-{{ post.id }}">{{ post.content }}</textarea>
+                        <button onclick="savePost({{ post.id }})" class="btn btn-primary">Save</button>
+                    </div>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
@@ -34,5 +43,6 @@
         </ul>
     </nav>
 </div>
+
 {% endblock %}
 
