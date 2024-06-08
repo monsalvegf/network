@@ -19,8 +19,6 @@
                 <a href="{% url 'network:profile' post.user.username %}"><strong>{{ post.user.username }}</strong></a>
                 <div id="post-content-{{ post.id }}">
                     <p>{{ post.content }}</p>
-                    <small class="text-muted">{{ post.timestamp }}</small>
-                    <p><strong>{{ post.likes_count }} likes</strong></p>
                 </div>
                 {% if user == post.user %}
                     <button id="edit-button-{{ post.id }}" onclick="editPost({{ post.id }})" class="btn btn-secondary">Edit</button>
@@ -29,6 +27,10 @@
                         <button onclick="savePost({{ post.id }})" class="btn btn-primary">Save</button>
                     </div>
                 {% endif %}
+                <div>
+                    <small class="text-muted">{{ post.timestamp }}</small>
+                    <p><strong>{{ post.likes_count }} likes</strong></p>
+                </div>
             </li>
         {% endfor %}
     </ul>
