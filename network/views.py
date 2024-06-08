@@ -138,7 +138,7 @@ def following(request):
     following_users = User.objects.filter(followed__user=user)
     
     # Obtener posts de los usuarios seguidos, ordenados por fecha de creación en orden descendente, en grupos de 10 por página.
-    posts_list = Post.objects.filter(user__in=following_users).order_by('-timestamp')
+    posts_list = Post.objects.filter(user__in=following_users).annotate(likes_count=Count('liked')).order_by('-timestamp')
     paginator = Paginator(posts_list, 10)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
@@ -146,6 +146,7 @@ def following(request):
     # Renderizar la vista con los posts obtenidos.
     return render(request, "network/following.html", {"posts": posts})
 
+@login_required
 @require_POST
 @csrf_exempt
 def save_post(request, post_id):
@@ -160,3 +161,20 @@ def save_post(request, post_id):
 
 
 
+@login_required
+@csrf_exempt
+@require_POST
+def toggle_like(request, post_id):
+    data = json.loads(request.body)
+    post = Post.objects.get(id=post_id)
+    liked = data.get('liked')
+
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    if not liked:  # If the post is currently liked and needs to be unliked
+        like.delete()
+        liked = False
+    else:
+        liked = True
+
+    likes_count = post.liked.count()
+    return JsonResponse({'liked': liked, 'likes_count': likes_count})

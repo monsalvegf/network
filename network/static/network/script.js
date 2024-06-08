@@ -49,3 +49,30 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+function toggleLike(postId, event) {
+    const button = event.target;
+    const liked = button.getAttribute('data-liked') === 'true';
+    const url = `/toggle_like/${postId}/`;  // Ensure this URL matches your Django URL configuration for toggling likes
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ liked: !liked })  // Send the new like status
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok.');
+        return response.json();
+    })
+    .then(data => {
+        button.setAttribute('data-liked', data.liked ? 'true' : 'false');
+        button.classList.toggle('btn-success', data.liked);
+        button.classList.toggle('btn-outline-secondary', !data.liked);
+        document.getElementById(`like-count-${postId}`).innerText = `${data.likes_count} likes`;
+    })
+    .catch(error => console.error('Error:', error));
+}
+

@@ -30,10 +30,20 @@
                 <div>
                     <small class="text-muted">{{ post.timestamp }}</small>
                     <p><strong>{{ post.likes_count }} likes</strong></p>
+                    {% if user.is_authenticated %}
+                        <button id="like-button-{{ post.id }}" onclick="toggleLike({{ post.id }}, event)"
+                                class="btn {% if post in user.liked_posts.all %}btn-success{% else %}btn-outline-secondary{% endif %}" 
+                                data-liked="{% if post in user.liked_posts.all %}true{% else %}false{% endif %}">
+                            Like
+                        </button>
+                    {% endif %}
+                
                 </div>
             </li>
         {% endfor %}
     </ul>
+
+
     <nav aria-label="Page navigation">
         <ul class="pagination">
             {% if posts.has_previous %}
