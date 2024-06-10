@@ -21,7 +21,7 @@
                 <p>{{ post.content }}</p>
             </div>
             {% if user == post.user %}
-            <button class="edit-button btn btn-secondary" data-post-id="{{ post.id }}">Edit</button>
+            <button id="edit-button-{{ post.id }}" class="edit-button btn btn-secondary" data-post-id="{{ post.id }}">Edit</button>
             <div id="edit-form-{{ post.id }}" class="edit-form" style="display:none;">
                 <textarea class="form-control edit-content" id="edit-content-{{ post.id }}">{{ post.content }}</textarea>
                 <button class="btn btn-primary save-button" data-post-id="{{ post.id }}">Save</button>
