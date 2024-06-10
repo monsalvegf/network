@@ -2,9 +2,11 @@
 
 {% block body %}
 <div class="container">
-    <h2>{{ user_profile.username }}</h2>
-    <p>Followers: {{ followers_count }}</p>
-    <p>Following: {{ following_count }}</p>
+    <div class="d-flex justify-content-start align-items-center mb-4">
+        <h2 class="mr-3">{{ user_profile.username }}</h2>
+        <p class="text-muted mr-3 mb-0" style="font-size: 0.8rem;">Following: {{ following_count }}, Followers: {{ followers_count }}</p>
+    </div>
+
     <h4>My Posts:</h4>
     <ul class="list-group">
         {% for post in posts %}
@@ -34,3 +36,4 @@
     </ul>
 </div>
 {% endblock %}
+
