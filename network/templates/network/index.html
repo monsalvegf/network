@@ -21,19 +21,18 @@
                 <p>{{ post.content }}</p>
             </div>
             {% if user == post.user %}
-            <button id="edit-button-{{ post.id }}" onclick="editPost({{ post.id }})" class="btn btn-secondary">Edit</button>
-            <div id="edit-form-{{ post.id }}" style="display:none;">
-                <textarea class="form-control" id="edit-content-{{ post.id }}">{{ post.content }}</textarea>
-                <button onclick="savePost({{ post.id }})" class="btn btn-primary">Save</button>
+            <button class="edit-button btn btn-secondary" data-post-id="{{ post.id }}">Edit</button>
+            <div id="edit-form-{{ post.id }}" class="edit-form" style="display:none;">
+                <textarea class="form-control edit-content" id="edit-content-{{ post.id }}">{{ post.content }}</textarea>
+                <button class="btn btn-primary save-button" data-post-id="{{ post.id }}">Save</button>
             </div>
             {% endif %}
             <div>
                 <small class="text-muted">{{ post.timestamp }}</small>
                 <p id="like-count-{{ post.id }}"><strong>{{ post.likes_count }} likes</strong></p>
                 {% if user.is_authenticated %}
-                <button id="like-button-{{ post.id }}" onclick="toggleLike({{ post.id }}, event)"
-                        class="btn {% if post.user_has_liked %}btn-success{% else %}btn-outline-secondary{% endif %}" 
-                        data-liked="{% if post.user_has_liked %}true{% else %}false{% endif %}">
+                <button class="btn like-button {% if post.user_has_liked %}btn-success{% else %}btn-outline-secondary{% endif %}" 
+                        data-post-id="{{ post.id }}" data-liked="{% if post.user_has_liked %}true{% else %}false{% endif %}">
                     Like
                 </button>
                 {% endif %}
@@ -41,6 +40,7 @@
         </li>
         {% endfor %}
     </ul>
+    
     
     
 

@@ -1,12 +1,42 @@
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Document is ready and event listeners are being set up.');
+
+    document.querySelectorAll('.edit-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+            console.log('Edit button clicked for post:', postId);
+            editPost(postId);
+        });
+    });
+    
+    // Guardar cambios del post editado
+    document.querySelectorAll('.save-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+            savePost(postId);
+        });
+    });
+
+    // Toggle like
+    document.querySelectorAll('.like-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const postId = this.dataset.postId;
+            toggleLike(postId, event);
+        });
+    });
+});
+
 function editPost(postId) {
     let contentP = document.getElementById('post-content-' + postId);
     let editForm = document.getElementById('edit-form-' + postId);
-    let editButton = document.getElementById('edit-button-' + postId);  // Reference the Edit button
+    let editButton = document.getElementById('edit-button-' + postId);
 
     contentP.style.display = 'none';
     editForm.style.display = 'block';
-    editButton.style.display = 'none';  // Hide the Edit button when editing
+    editButton.style.display = 'none';
 }
+
 
 function savePost(postId) {
     let editedContent = document.getElementById('edit-content-' + postId).value;
@@ -20,19 +50,26 @@ function savePost(postId) {
             'Content-Type': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         let contentP = document.getElementById('post-content-' + postId);
         let editForm = document.getElementById('edit-form-' + postId);
-        let editButton = document.getElementById('edit-button-' + postId);  // Reference the Edit button
+        let editButton = document.getElementById('edit-button-' + postId);
 
         contentP.innerText = editedContent;
         contentP.style.display = 'block';
         editForm.style.display = 'none';
-        editButton.style.display = 'inline';  // Show the Edit button again once editing is saved
+        editButton.style.display = 'inline';
     })
     .catch(error => console.error('Error:', error));
 }
+
+// Resto de funciones (getCookie, toggleLike)
 
 
 
