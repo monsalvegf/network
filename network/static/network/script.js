@@ -10,7 +10,7 @@ function editPost(postId) {
 
 function savePost(postId) {
     let editedContent = document.getElementById('edit-content-' + postId).value;
-    fetch(`/save_post/${postId}`, {
+    fetch(`/save_post/${postId}/`, {
         method: 'POST',
         body: JSON.stringify({
             content: editedContent
@@ -34,16 +34,17 @@ function savePost(postId) {
     .catch(error => console.error('Error:', error));
 }
 
+
+
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');  // Divide el string de cookies en un array
+        const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
-            let cookie = cookies[i].trim();  // Elimina espacios en blanco antes y después del contenido del cookie
-            // Comprueba si el nombre del cookie es igual al nombre buscado
+            let cookie = cookies[i].trim();
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;  // Sale del bucle una vez que encuentra el cookie
+                break;
             }
         }
     }
@@ -52,27 +53,42 @@ function getCookie(name) {
 
 function toggleLike(postId, event) {
     const button = event.target;
+    if (!button) {
+        console.error('Error: No button found');
+        return;  // Salir de la función si no se encuentra el botón
+    }
     const liked = button.getAttribute('data-liked') === 'true';
-    const url = `/toggle_like/${postId}/`;  // Ensure this URL matches your Django URL configuration for toggling likes
+    const url = `/toggle_like/${postId}/`;
 
     fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCookie('csrftoken'),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')  // Asegurar que el CSRF token es incluido
         },
-        body: JSON.stringify({ liked: !liked })  // Send the new like status
+        body: JSON.stringify({ liked: !liked })  // Invertir el estado de 'liked'
     })
     .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok.');
+        if (!response.ok) {
+            throw new Error(`HTTP status ${response.status}`);
+        }
         return response.json();
     })
     .then(data => {
-        button.setAttribute('data-liked', data.liked ? 'true' : 'false');
-        button.classList.toggle('btn-success', data.liked);
-        button.classList.toggle('btn-outline-secondary', !data.liked);
-        document.getElementById(`like-count-${postId}`).innerText = `${data.likes_count} likes`;
+        // Asegurar que la respuesta contiene los datos esperados
+        if (data.hasOwnProperty('liked') && data.hasOwnProperty('likes_count')) {
+            button.setAttribute('data-liked', data.liked ? 'true' : 'false');
+            button.classList.toggle('btn-success', data.liked);
+            button.classList.toggle('btn-outline-secondary', !data.liked);
+            document.getElementById(`like-count-${postId}`).innerText = `${data.likes_count} likes`;
+        } else {
+            throw new Error('Invalid response data');
+        }
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while toggling the like status.');  // Opcional: notificar al usuario
+    });
 }
+
 

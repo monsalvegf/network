@@ -19,6 +19,9 @@ class Post(models.Model):
             "timestamp": self.timestamp.strftime("%b %d %Y, %I:%M %p"),
         }
     
+    def is_liked_by(self, user):
+        return self.liked.filter(user=user).exists()
+
     def __str__(self):
         return f"{self.user} posted {self.content} on {self.timestamp}"
     

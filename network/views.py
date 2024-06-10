@@ -22,12 +22,24 @@ def index(request):
         new_post.save()
         return HttpResponseRedirect(reverse("network:index"))
     else:
+        user = request.user
         posts_list = Post.objects.all().annotate(likes_count=Count('liked')).order_by('-timestamp')
         paginator = Paginator(posts_list, 10)  # Mostrar 10 posts por página
-        page_number = request.GET.get('page')  # Obtener el número de página desde el URL
-        posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
-        return render(request, "network/index.html", {"posts": posts})
 
+        # Obtener el número de página desde el URL
+        page_number = request.GET.get('page')
+        posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
+
+        # Añadir información de 'like' si el usuario está autenticado
+        if user.is_authenticated:
+            liked_posts_ids = set(Like.objects.filter(user=user).values_list('post_id', flat=True))
+            for post in posts:
+                post.user_has_liked = post.id in liked_posts_ids
+        else:
+            for post in posts:
+                post.user_has_liked = False
+
+        return render(request, "network/index.html", {"posts": posts})
 
 def login_view(request):
     if request.method == "POST":
@@ -160,21 +172,37 @@ def save_post(request, post_id):
         return JsonResponse({"error": "Post not found or permission denied."}, status=404)
 
 
-
 @login_required
 @csrf_exempt
 @require_POST
 def toggle_like(request, post_id):
     data = json.loads(request.body)
-    post = Post.objects.get(id=post_id)
     liked = data.get('liked')
 
-    like, created = Like.objects.get_or_create(user=request.user, post=post)
-    if not liked:  # If the post is currently liked and needs to be unliked
-        like.delete()
-        liked = False
-    else:
-        liked = True
+    try:
+        post = Post.objects.get(id=post_id)
+        try:
+            like_instance = Like.objects.get(user=request.user, post=post)
+            if liked:
+                # Si 'liked' es True pero el like ya existe, no necesitamos hacer nada.
+                liked = True
+            else:
+                # Si 'liked' es False y el like existe, entonces lo eliminamos.
+                like_instance.delete()
+                liked = False
+        except Like.DoesNotExist:
+            if liked:
+                # Si 'liked' es True y no existe el like, lo creamos.
+                Like.objects.create(user=request.user, post=post)
+                liked = True
+            else:
+                # Si 'liked' es False y no existe el like, es una operación no válida.
+                liked = False
 
-    likes_count = post.liked.count()
-    return JsonResponse({'liked': liked, 'likes_count': likes_count})
+        likes_count = post.liked.count()
+        return JsonResponse({'liked': liked, 'likes_count': likes_count})
+
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post not found"}, status=404)
+
+
