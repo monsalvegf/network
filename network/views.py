@@ -116,6 +116,27 @@ def profile(request, username):
         "following": following
     })
 
+
+@login_required
+def user_posts(request):
+    user_profile = get_object_or_404(User, username=request.user.username)
+
+    # Obtener los conteos de seguidores y seguidos
+    user_with_counts = User.objects.filter(username=request.user.username).annotate(
+        followers_count=Count('followed'), 
+        following_count=Count('follower')   
+    ).first()  # Utiliza .first() para obtener un solo objeto
+
+    posts = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+
+    return render(request, "network/user_posts.html", {
+        "posts": posts,
+        "user_profile": user_profile,
+        "followers_count": user_with_counts.followers_count,
+        "following_count": user_with_counts.following_count
+    })
+
+
 @login_required
 def follow(request, username):
     profile_user = get_object_or_404(User, username=username)

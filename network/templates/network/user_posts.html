@@ -2,11 +2,13 @@
 
 {% block body %}
 <div class="container">
-    <h2>Following</h2>
+    <h2>{{ user_profile.username }}</h2>
+    <p>Followers: {{ followers_count }}</p>
+    <p>Following: {{ following_count }}</p>
+    <h4>My Posts:</h4>
     <ul class="list-group">
         {% for post in posts %}
         <li class="list-group-item" id="post-{{ post.id }}">
-            <a href="{% url 'network:profile' post.user.username %}"><strong>{{ post.user.username }}</strong></a>
             <div id="post-content-{{ post.id }}">
                 <p>{{ post.content }}</p>
             </div>
@@ -30,15 +32,5 @@
         </li>
         {% endfor %}
     </ul>
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {% if posts.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a></li>
-            {% endif %}
-            {% if posts.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">Next</a></li>
-            {% endif %}
-        </ul>
-    </nav>
 </div>
 {% endblock %}
