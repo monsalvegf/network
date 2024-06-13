@@ -102,7 +102,12 @@ def profile(request, username):
         following_count=Count('follower')   # follower es el related_name para los seguidos
     ).get()
     
-    posts = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+    posts_list = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+    paginator = Paginator(posts_list, 10)  # Mostrar 10 posts por página
+
+    # Obtener el número de página desde el URL
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
 
     following = False
     if request.user.is_authenticated:
@@ -127,7 +132,12 @@ def user_posts(request):
         following_count=Count('follower')   
     ).first()  # Utiliza .first() para obtener un solo objeto
 
-    posts = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+    posts_list = Post.objects.filter(user=user_profile).annotate(likes_count=Count('liked')).order_by('-timestamp')
+    paginator = Paginator(posts_list, 10)  # Mostrar 10 posts por página
+
+    # Obtener el número de página desde el URL
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
 
     return render(request, "network/user_posts.html", {
         "posts": posts,
