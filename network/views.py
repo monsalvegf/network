@@ -95,6 +95,7 @@ def register(request):
 
 def profile(request, username):
     user_profile = get_object_or_404(User, username=username)
+    user = request.user
     
     # Obtener los conteos de seguidores y seguidos
     user_with_counts = User.objects.filter(username=username).annotate(
@@ -113,6 +114,15 @@ def profile(request, username):
     if request.user.is_authenticated:
         following = Follow.objects.filter(user=request.user, following=user_profile).exists()
 
+    # Añadir información de 'like' si el usuario está autenticado
+    if user.is_authenticated:
+        liked_posts_ids = set(Like.objects.filter(user=user).values_list('post_id', flat=True))
+        for post in posts:
+            post.user_has_liked = post.id in liked_posts_ids
+    else:
+        for post in posts:
+            post.user_has_liked = False
+
     return render(request, "network/profile.html", {
         "posts": posts,
         "user_profile": user_profile,
@@ -124,6 +134,7 @@ def profile(request, username):
 
 @login_required
 def user_posts(request):
+    user = request.user
     user_profile = get_object_or_404(User, username=request.user.username)
 
     # Obtener los conteos de seguidores y seguidos
@@ -138,6 +149,15 @@ def user_posts(request):
     # Obtener el número de página desde el URL
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)  # Obtener los posts para la página requerida
+
+    # Añadir información de 'like' si el usuario está autenticado
+    if user.is_authenticated:
+        liked_posts_ids = set(Like.objects.filter(user=user).values_list('post_id', flat=True))
+        for post in posts:
+            post.user_has_liked = post.id in liked_posts_ids
+    else:
+        for post in posts:
+            post.user_has_liked = False
 
     return render(request, "network/user_posts.html", {
         "posts": posts,
@@ -154,6 +174,7 @@ def follow(request, username):
         Follow.objects.get_or_create(user=request.user, following=profile_user)
     return redirect('network:profile', username=username)
 
+
 @login_required
 def unfollow(request, username):
     profile_user = get_object_or_404(User, username=username)
@@ -161,22 +182,12 @@ def unfollow(request, username):
         Follow.objects.filter(user=request.user, following=profile_user).delete()
     return redirect('network:profile', username=username)
 
-@login_required
-def following(request, username):
-    # Obtener el perfil de usuario; asegurándose de que existe.
-    user_profile = get_object_or_404(User, username=username)
-    
-    # Obtener posts asociados al usuario, ordenados por fecha de creación en orden descendente.
-    posts = Post.objects.filter(user=user_profile).order_by('-timestamp')
-    
-    # Renderizar la vista con los posts obtenidos.
-    return render(request, "network/following.html", {"posts": posts})
 
 @login_required
 def following(request):
     # Obtener el usuario actual.
     user = request.user
-    
+      
     # Obtener los usuarios que el usuario actual sigue.
     following_users = User.objects.filter(followed__user=user)
     
@@ -185,6 +196,15 @@ def following(request):
     paginator = Paginator(posts_list, 10)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
+
+    # Añadir información de 'like' si el usuario está autenticado
+    if user.is_authenticated:
+        liked_posts_ids = set(Like.objects.filter(user=user).values_list('post_id', flat=True))
+        for post in posts:
+            post.user_has_liked = post.id in liked_posts_ids
+    else:
+        for post in posts:
+            post.user_has_liked = False
     
     # Renderizar la vista con los posts obtenidos.
     return render(request, "network/following.html", {"posts": posts})
